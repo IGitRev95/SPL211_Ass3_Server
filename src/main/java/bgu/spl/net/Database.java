@@ -1,12 +1,12 @@
 package bgu.spl.net;
-import bgu.spl.net.impl.rci.Course;
-import bgu.spl.net.impl.rci.User;
+import bgu.spl.net.impl.BGUSERVER.EncoderDecoderBGU;
+import bgu.spl.net.impl.rci.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Stream;
 
 /**
@@ -21,16 +21,17 @@ public class Database {
 public static class SingletonHolder{
 	private static Database instance= new Database();
 }
-private Vector<Course> courses= new Vector<>();
-private ConcurrentHashMap<String,User> RegisterList= new ConcurrentHashMap<>();
-private ConcurrentHashMap<String,User> LoginManagement= new ConcurrentHashMap<>();
+private final LinkedHashMap<Integer,Course> courses= new LinkedHashMap<>();
+//private Vector<Course> courses= new Vector<>();
+private final ConcurrentHashMap<String,User> RegisterList= new ConcurrentHashMap<>();
+//private ConcurrentHashMap<String,User> LoginManagement= new ConcurrentHashMap<>();
 
 
 
 	//to prevent user from creating new Database
 	private Database() {
 		// TODO: by name txt and not with args cant think other way so far because it is private...
-		initialize("Courses.txt");
+		if(!initialize("Courses.txt")) throw new Error(("something get wrong with the initialization"));
 	}
 
 	/**
@@ -43,29 +44,63 @@ private ConcurrentHashMap<String,User> LoginManagement= new ConcurrentHashMap<>(
 	public static Database getInstance() {
 		return SingletonHolder.instance;
 	}
-	
+
 	/**
 	 * loades the courses from the file path specified 
 	 * into the Database, returns true if successful.
 	 */
 	boolean initialize(String coursesFilePath) {
 		// TODO: implement
-		try {
-			String[] DataLine;
+		try { // try read the txt file
 			 File myObj = new File(coursesFilePath);
 			Scanner myReader = new Scanner(myObj);
-			while (myReader.hasNextLine()) {
-				String data = myReader.nextLine();
-				System.out.println(data);
-				DataLine =  data.split("\\|");
-				int[] KdamCheckAsInt={};
-				if(!DataLine[2].equals("[]")){
-				String[] KdamCheckAsString=(DataLine[2].substring(1,DataLine[2].length()-1)).split(",");
-				 KdamCheckAsInt= Stream.of(KdamCheckAsString).mapToInt(Integer::parseInt).toArray();}
-				 Course current= new Course(Integer.parseInt(DataLine[0]),DataLine[1],KdamCheckAsInt,Integer.parseInt(DataLine[3]));
-				 courses.add(current);
+			while (myReader.hasNextLine()) { // while has one more line
+				String data = myReader.nextLine(); // return this line and move forward
+				String[] DataLine = data.split("\\|"); // return Array of String of this line split by |
+				//int[] KdamCheckAsInt={};
+				LinkedHashSet<Integer> KdamCheckAsInt = new LinkedHashSet<>();
+				if (!DataLine[2].equals("[]")) { // if Kdam check is not empty
+					// making Array of ints from the Array of Strings
+					String[] KdamCheckAsString = (DataLine[2].substring(1, DataLine[2].length() - 1)).split(",");
+					for (int i = 0; i < KdamCheckAsString.length; i++) {
+						KdamCheckAsInt.add(Integer.parseInt(KdamCheckAsString[i]));
+					}
+				//KdamCheckAsInt= Stream.of(KdamCheckAsString).mapToInt(Integer::parseInt).toArray();
+			    }
+				// add this course to the list of courses
+				int CourseNum=Integer.parseInt(DataLine[0]);
+				 Course current= new Course(CourseNum,DataLine[1],KdamCheckAsInt,Integer.parseInt(DataLine[3]));
+				 courses.put(CourseNum,current);
 				}
+			//---------------checking-----------------------------------
+			{
+				Register(TypeOfUser.Student, "Nave", "123123");
+				User nave = Login("Nave", "123123");
+				Register(TypeOfUser.Student, "yossi", "123123");
+				User yossi = Login("yossi", "123123");
+				Register(TypeOfUser.Admin, "Yoav", "123123");
+				User Yoav = Login("Yoav", "123123");
+				RegisterCourse(nave, 101);
+				try {
+					RegisterCourse(nave, 101);
+					UnRegisterCourse(yossi, 202);
+				} catch (MyServerError e) {
+					System.out.println(e);
+				}
+
+				Thread t1 = new Thread(() -> RegisterCourse(yossi, 101));
+				Thread t3 = new Thread(() -> RegisterCourse(nave, 201));
+				Thread t2 = new Thread(() -> System.out.println(CourseStat(101)));
+				Thread t4 = new Thread(() -> System.out.println(StudentStat("Nave")));
+				t1.start();
+				t2.start();
+				t3.start();
+				t4.start();
+				System.out.println(CourseStat(101));
+			}
+			//
 			myReader.close();
+			return true;
 			}catch(FileNotFoundException e){
 			System.out.println("An error occurred.");
 			e.printStackTrace();
@@ -74,5 +109,86 @@ private ConcurrentHashMap<String,User> LoginManagement= new ConcurrentHashMap<>(
 		return false;
 	}
 
+	private User getUser(String username){
+		User user=  RegisterList.getOrDefault(username,null);
+		if (user==null) throw new MyServerError("user by this name not registered");
+		else return user;
+	}
 
-}
+	private Course getCourse(int CourseNum){
+		Course course= courses.getOrDefault(CourseNum,null);
+		if (course==null)throw new MyServerError("there is not corsue"+ CourseNum+" in the System");
+		return course;
+	}
+
+    public void Register(TypeOfUser type, String username, String password)  {
+		synchronized (RegisterList) { // case that 2 Students try to Register with the same name
+			User user = new User(type, username, password);
+			if (RegisterList.putIfAbsent(username, user) != null) throw new MyServerError("already user with name"+username+" in the system");
+		}}
+
+	public User Login(String username, String password){
+		User user= getUser(username);
+		if(!(user.assertPassword(password))) throw new MyServerError("wrong password");
+	    if(!(user.getIsLogedIn().compareAndSet(false,true))) throw new MyServerError("already Loged in");
+	    return user;
+		}
+
+	public void Logout(User user) {
+		if (!(user.getIsLogedIn().compareAndSet(true, false))) throw new MyServerError("allready Logout");
+	}
+
+	public void RegisterCourse (User user, int CourseNum ){
+         Course course= getCourse(CourseNum);
+         course.register(user);
+         user.RegisterToCourse(CourseNum);
+		}
+
+	public void UnRegisterCourse(User user,int CourseNum){
+		Course course= getCourse(CourseNum);
+		course.unregister(user);
+		user.unregister(CourseNum);
+	}
+
+	public String getKdamCheckList(int CourseNum){
+		Course course= getCourse(CourseNum);
+		return(Arrays.toString(course.getKdamCheck().toArray()));
+	}
+
+	public String CourseStat(int CourseNum) {
+		Course course = getCourse(CourseNum);
+        return course.CourseStat();
+		}
+
+	public String StudentStat(String username) {
+		User Student = getUser(username);
+		//TODO: check if need Sync
+		try {
+			Student.ReadCourses(); // (lock)case that student try to register/unregister the time Admin iterate the list
+			{
+				return username + "\n" + ListOfCoursesStudentRegisteredOrdered(Student);
+			}
+		}finally {
+			Student.finishReadCourses();
+		}
+	}
+
+	public String ListOfCoursesStudentRegisteredOrdered(User Student){
+		Collection<Integer> CoursesOfStudent= Student.getCoursesRegistered();
+		int[] ArrayOrdered = new int[CoursesOfStudent.size()];
+		int i = 0;
+		for (Map.Entry<Integer, Course> entry : courses.entrySet()) {
+			Integer key = entry.getKey();
+			if (Student.IsRegisteredToCourse(key))
+				ArrayOrdered[i++] = key;
+		}
+		return Arrays.toString(ArrayOrdered);
+	}
+
+	public boolean IsRegisteredtoCoruse(User user, int CourseNum){
+		return user.IsRegisteredToCourse(CourseNum);
+	}
+	}
+
+
+

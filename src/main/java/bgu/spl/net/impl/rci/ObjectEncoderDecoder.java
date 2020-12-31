@@ -15,14 +15,25 @@ public class ObjectEncoderDecoder implements MessageEncoderDecoder<Serializable>
     private final ByteBuffer lengthBuffer = ByteBuffer.allocate(4);
     private byte[] objectBytes = null;
     private int objectBytesIndex = 0;
+    public static void main (String []args){
+        byte[] bytes= new byte[10];
+        bytes[2]=1; bytes[3]=2;
 
+        ObjectEncoderDecoder O= new ObjectEncoderDecoder();
+        Serializable k;
+        int i=0;
+        do {
+          k= O.decodeNextByte(bytes[i++]);
+        }while (k==null);
+        System.out.println(k);
+    }
     @Override
-    public Serializable decodeNextByte(byte nextByte) {
+    public Serializable decodeNextByte(byte nextByte) { // 0003
         if (objectBytes == null) { //indicates that we are still reading the length
             lengthBuffer.put(nextByte);
             if (!lengthBuffer.hasRemaining()) { //we read 4 bytes and therefore can take the length
                 lengthBuffer.flip();
-                objectBytes = new byte[lengthBuffer.getInt()];
+                objectBytes = new byte[lengthBuffer.getInt()]; //256
                 objectBytesIndex = 0;
                 lengthBuffer.clear();
             }

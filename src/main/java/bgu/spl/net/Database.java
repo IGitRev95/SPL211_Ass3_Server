@@ -74,29 +74,29 @@ private final ConcurrentHashMap<String,User> RegisterList= new ConcurrentHashMap
 				}
 			//---------------checking-----------------------------------
 			{
-				Register(TypeOfUser.Student, "Nave", "123123");
-				User nave = Login("Nave", "123123");
-				Register(TypeOfUser.Student, "yossi", "123123");
-				User yossi = Login("yossi", "123123");
-				Register(TypeOfUser.Admin, "Yoav", "123123");
-				User Yoav = Login("Yoav", "123123");
-				RegisterCourse(nave, 101);
-				try {
-					RegisterCourse(nave, 101);
-					UnRegisterCourse(yossi, 202);
-				} catch (MyServerError e) {
-					System.out.println(e);
-				}
-
-				Thread t1 = new Thread(() -> RegisterCourse(yossi, 101));
-				Thread t3 = new Thread(() -> RegisterCourse(nave, 201));
-				Thread t2 = new Thread(() -> System.out.println(CourseStat(101)));
-				Thread t4 = new Thread(() -> System.out.println(StudentStat("Nave")));
-				t1.start();
-				t2.start();
-				t3.start();
-				t4.start();
-				System.out.println(CourseStat(101));
+//				Register(TypeOfUser.Student, "Nave", "123123");
+//				User nave = Login("Nave", "123123");
+//				Register(TypeOfUser.Student, "yossi", "123123");
+//				User yossi = Login("yossi", "123123");
+//				Register(TypeOfUser.Admin, "Yoav", "123123");
+//				User Yoav = Login("Yoav", "123123");
+//				RegisterCourse(nave, 101);
+//				try {
+//					RegisterCourse(nave, 101);
+//					UnRegisterCourse(yossi, 202);
+//				} catch (MyServerError e) {
+//					System.out.println(e);
+//				}
+//
+//				Thread t1 = new Thread(() -> RegisterCourse(yossi, 101));
+//				Thread t3 = new Thread(() -> RegisterCourse(nave, 201));
+//				Thread t2 = new Thread(() -> System.out.println(CourseStat(101)));
+//				Thread t4 = new Thread(() -> System.out.println(StudentStat("Nave")));
+//				t1.start();
+//				t2.start();
+//				t3.start();
+//				t4.start();
+//				System.out.println(CourseStat(101));
 			}
 			//
 			myReader.close();

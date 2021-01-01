@@ -31,6 +31,7 @@ public class  MessagingProtocolStudent implements MessagingProtocol<CSCommand> {
                 case 3:
                     CurrentUserLogin = database.Login(CmdArgs[0], CmdArgs[1]);
                     cs = new ACKimp(opcode);
+                    break;
                     //Logout
                 case 4:
                     if (CurrentUserLogin == null) throw new MyServerError("not login");

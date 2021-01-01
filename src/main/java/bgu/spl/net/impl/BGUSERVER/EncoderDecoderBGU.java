@@ -26,7 +26,7 @@ String[] arguments= new String[2];
         if (opcode == -1){
             lengthBuffer.put(nextByte);
             opcodebytes[len++]=nextByte;
-            if (!lengthBuffer.hasRemaining()) { //we read 4 bytes and therefore can take the length
+            if (!lengthBuffer.hasRemaining()) {
                 lengthBuffer.flip();
                 lengthBuffer.clear();
                 opcode= bytesToShort(opcodebytes);
@@ -36,12 +36,8 @@ String[] arguments= new String[2];
             else{
                 len++;
                 vector.add(nextByte);
-                if (index>=1 && nextByte=='\0'){
-                    bytes = Toarray(vector);
-                 arguments[index-1]= popString();
-                 index++;
-                 vector.clear();
-                 if (index>=3) return decodeByopcode();
+                if (nextByte=='\0'){
+                    return decodeByopcode();
                 }
                 return null;
             }
@@ -58,21 +54,47 @@ String[] arguments= new String[2];
 
 
         return null;}
+    private void reset(){
+        index=0;
+        len=0;
+        opcode=-1;
+    }
     private CSCommand decodeByopcode(){
-        CSCommand output= new CSCommand(opcode);
+        CSCommand output= null;
         switch (opcode){
             case 1:
             case 2:
             case 3:
-                output.SetArgument1(arguments[0]);
-                output.SetArgument2(arguments[1]);
+                bytes = Toarray(vector);
+                arguments[index-1]= popString();
+                index++;
+                vector.clear();
+                if(index>=3) {
+                    output = new CSCommand(opcode);
+                    output.SetArgument1(arguments[0]);
+                    output.SetArgument2(arguments[1]);
+                    reset();
+                }
+                break;
+            case 4:
+            case 11:
+                output=new CSCommand(opcode);
                 break;
             case 5:
             case 6:
             case 7:
             case 9:
             case 10:
-                output.SetArgument1(arguments[1]);
+                bytes = Toarray(vector);
+                arguments[index-1]= popString();
+                index++;
+                vector.clear();
+                if(index>=2) {
+                    output = new CSCommand(opcode);
+                    output.SetArgument1(arguments[0]);
+                    reset();
+                }
+                break;
         }
         return output;
     }

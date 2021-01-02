@@ -88,7 +88,7 @@ public class  MessagingProtocolStudent implements MessagingProtocol<CSCommand> {
                         cs = new ACKimp(opcode);
                         cs.SetArgument2(Message);
                     }
-
+                    break;
                     //UNREGISTER
                 case 10:
                     if (CurrentUserLogin == null || CurrentUserLogin.getType() == TypeOfUser.Admin)

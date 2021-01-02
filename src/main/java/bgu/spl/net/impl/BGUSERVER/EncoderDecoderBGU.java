@@ -13,34 +13,33 @@ import java.util.Vector;
 
 public class EncoderDecoderBGU implements MessageEncoderDecoder<CSCommand> {
 private short opcode= -1;
+private short course=-1;
 private byte[] bytes;
 private byte[] objectBytes = null;
 private byte[] opcodebytes=new byte[2];
+private byte[] courseBytes=new byte[2];
 Vector<Byte> vector= new Vector<>();
 int index=0;
 private ByteBuffer lengthBuffer = ByteBuffer.allocate(2);
 int len=0;
 String[] arguments= new String[2];
-    public CSCommand decodeNextByte(byte nextByte){
-        if (len==200) throw new Error();
-        if (opcode == -1){
+    public CSCommand decodeNextByte(byte nextByte) {
+        if (opcode == -1) {
             lengthBuffer.put(nextByte);
-            opcodebytes[len++]=nextByte;
+            opcodebytes[len++] = nextByte;
             if (!lengthBuffer.hasRemaining()) {
                 lengthBuffer.flip();
                 lengthBuffer.clear();
-                opcode= bytesToShort(opcodebytes);
-                len=0;
-                index++;
-            }}
-            else{
-                len++;
-                vector.add(nextByte);
-                if (nextByte=='\0'){
-                    return decodeByopcode();
-                }
-                return null;
+                opcode = bytesToShort(opcodebytes);
+                len = 0;
+                if (opcode==4|opcode==11) return decodeByopcode(nextByte);
             }
+
+        } else {
+            return decodeByopcode(nextByte);
+        }
+        return null;
+    }
           /*  lengthBuffer.put(nextByte);
             if (!lengthBuffer.hasRemaining()) {
                 lengthBuffer.flip();
@@ -52,47 +51,62 @@ String[] arguments= new String[2];
         }else{
 */
 
-
-        return null;}
     private void reset(){
         index=0;
         len=0;
         opcode=-1;
     }
-    private CSCommand decodeByopcode(){
+    private CSCommand decodeByopcode(byte nextByte){
         CSCommand output= null;
         switch (opcode){
             case 1:
             case 2:
             case 3:
+                if (nextByte=='\0'){
                 bytes = Toarray(vector);
-                arguments[index-1]= popString();
-                index++;
+                arguments[index++]= popString();
                 vector.clear();
-                if(index>=3) {
+                if(index>=2) {
                     output = new CSCommand(opcode);
                     output.SetArgument1(arguments[0]);
                     output.SetArgument2(arguments[1]);
                     reset();
                 }
+                }else{
+                    vector.add(nextByte);
+                }
                 break;
             case 4:
             case 11:
                 output=new CSCommand(opcode);
+                reset();
                 break;
             case 5:
             case 6:
             case 7:
             case 9:
             case 10:
-                bytes = Toarray(vector);
-                arguments[index-1]= popString();
-                index++;
-                vector.clear();
-                if(index>=2) {
+                lengthBuffer.put(nextByte);
+                courseBytes[index++]=nextByte;
+                if (!lengthBuffer.hasRemaining()){
+                    lengthBuffer.flip();
+                    lengthBuffer.clear();
+                    course= bytesToShort(courseBytes);
+                    output = new CSCommand(opcode);
+                    output.SetArgument1(""+course);
+                    reset();
+                }
+                break;
+            case 8:
+                if (nextByte=='\0'){
+                    bytes = Toarray(vector);
+                    arguments[index++]= popString();
+                    vector.clear();
                     output = new CSCommand(opcode);
                     output.SetArgument1(arguments[0]);
                     reset();
+                }else{
+                    vector.add(nextByte);
                 }
                 break;
         }

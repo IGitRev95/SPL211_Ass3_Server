@@ -74,8 +74,15 @@ private final ConcurrentHashMap<String,User> RegisterList= new ConcurrentHashMap
 				}
 			//---------------checking-----------------------------------
 			{
-//				Register(TypeOfUser.Student, "Nave", "123123");
-//				User nave = Login("Nave", "123123");
+				Register(TypeOfUser.Student, "Nave", "123123");
+				User nave = Login("Nave", "123123");
+				RegisterCourse(nave,101);
+				RegisterCourse(nave, 201);
+				Register(TypeOfUser.Student, "yoav", "123123");
+				User yoav = Login("yoav", "123123");
+				RegisterCourse(yoav, 102);
+				RegisterCourse(yoav ,101);
+//				Logout(nave);
 //				Register(TypeOfUser.Student, "yossi", "123123");
 //				User yossi = Login("yossi", "123123");
 //				Register(TypeOfUser.Admin, "Yoav", "123123");

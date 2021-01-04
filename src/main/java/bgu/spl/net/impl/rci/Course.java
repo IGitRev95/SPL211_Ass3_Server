@@ -70,7 +70,7 @@ public String CourseStat(){
     private String getListofStudents() {
         List<String> ListCopy= new ArrayList<>(ListofStudents);
         ListCopy.sort(String::compareTo);
-        return (Arrays.toString(ListCopy.toArray()));
+        return (Arrays.toString(ListCopy.toArray()).replaceAll(", ",","));
     }
 
     private String getSeatsAvailable(){

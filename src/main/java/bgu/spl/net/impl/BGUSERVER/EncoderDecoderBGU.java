@@ -28,9 +28,10 @@ String[] arguments= new String[2];
             lengthBuffer.put(nextByte);
             opcodebytes[len++] = nextByte;
             if (!lengthBuffer.hasRemaining()) {
+                opcode = bytesToShort(opcodebytes);
                 lengthBuffer.flip();
                 lengthBuffer.clear();
-                opcode = bytesToShort(opcodebytes);
+
                 len = 0;
                 if (opcode==4|opcode==11) return decodeByopcode(nextByte);
             }
@@ -40,16 +41,6 @@ String[] arguments= new String[2];
         }
         return null;
     }
-          /*  lengthBuffer.put(nextByte);
-            if (!lengthBuffer.hasRemaining()) {
-                lengthBuffer.flip();
-            }
-            if (nextByte=='\0') return null;
-        }
-        else if (opcode==-1){
-
-        }else{
-*/
 
     private void reset(){
         index=0;
@@ -148,13 +139,12 @@ String[] arguments= new String[2];
         bytesArr[1] = (byte)(num & 0xFF);
         return bytesArr;
     }
-    private void pushByte(byte nextByte){
-        if (len>=bytes.length)
-            bytes= Arrays.copyOf(bytes,len*2);
-        bytes[len++]=nextByte;
-    }
+//    private void pushByte(byte nextByte){
+//        if (len>=bytes.length)
+//            bytes= Arrays.copyOf(bytes,len*2);
+//        bytes[len++]=nextByte;
+//    }
     private String popString(){
-        int size= bytes.length;
         String result= new String(bytes,0,bytes.length, StandardCharsets.UTF_8);
         len=0;
         return result;

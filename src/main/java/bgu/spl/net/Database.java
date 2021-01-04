@@ -176,7 +176,7 @@ public class Database {
 
 	public String getKdamCheckList(int CourseNum) {
 		Course course = getCourse(CourseNum);
-		return (Arrays.toString(course.getKdamCheck().toArray()));
+		return (Arrays.toString(course.getKdamCheck().toArray()).replaceAll(", ",","));
 	}
 
 	public String CourseStat(int CourseNum) {
@@ -191,7 +191,7 @@ public class Database {
 		try {
 			Student.ReadCourses(); // (lock)case that student try to register/unregister the time Admin iterate the list
 			{
-				return "Student "+username + "\n" + "Courses "+ListOfCoursesStudentRegisteredOrdered(Student);
+				return "Student: "+username + "\n" + "Courses: "+ListOfCoursesStudentRegisteredOrdered(Student);
 			}
 		} finally {
 			Student.finishReadCourses();
@@ -207,8 +207,8 @@ public class Database {
 			if (Student.IsRegisteredToCourse(key))
 				ArrayOrdered[i++] = key;
 		}
-		//return Arrays.toString(ArrayOrdered);
-		return toString(ArrayOrdered);
+		return Arrays.toString(ArrayOrdered).replaceAll(", ",",");
+
 	}
 
 	public boolean IsRegisteredtoCoruse(User user, int CourseNum) {

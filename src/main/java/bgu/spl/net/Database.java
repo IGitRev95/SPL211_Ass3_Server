@@ -166,13 +166,13 @@ public class Database {
 	public User Login(String username, String password) {
 		User user = getUser(username);
 		if (!( user.assertPassword(password))) throw new MyServerError("Wrong password");
-		if (!( user.getIsLogedIn().compareAndSet(false, true )))
+		if (!( user.getIsLoggedIn().compareAndSet(false, true )))
 			throw new MyServerError("Already logged in");
 		return user;
 	}
 
 	public void Logout(User user) {
-		if (!(user.getIsLogedIn().compareAndSet(true, false))) throw new MyServerError("allready Logout");
+		if (!(user.getIsLoggedIn().compareAndSet(true, false))) throw new MyServerError("allready Logout");
 	}
 
 	public void RegisterCourse(User user, int CourseNum) {
@@ -204,13 +204,13 @@ public class Database {
 			  Student.ReadCourses(); // (lock) case that student try to register/unregister the time Admin iterate the list
 			  return "Student: "+username + "\n" + "Courses: "+ListOfCoursesStudentRegisteredOrdered(Student);
 		} finally { // freeing the lock guaranteed (even in case of exception)
-			Student.finishReadCourses();
+			  Student.finishReadCourses();
 		}
 	}
 
 	public String ListOfCoursesStudentRegisteredOrdered(User Student) {
 		// no need for sync cause student perform the act and he is the only manipulator of the data
-		Collection<Integer> CoursesOfStudent = Student.getCoursesRegistered();
+		Collection<Integer> CoursesOfStudent = Student.getCoursesRegisteredTo();
 		int[] ArrayOrdered = new int[CoursesOfStudent.size()];
 		int i = 0;
 		for (Map.Entry<Integer, Course> entry : courses.entrySet()) {

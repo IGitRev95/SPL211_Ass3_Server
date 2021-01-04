@@ -55,7 +55,7 @@ public class Course {
     }
 
     private boolean CheckKdamOfUser(User user) {
-        Collection<Integer> ListUser = user.getCoursesRegistered();
+        Collection<Integer> ListUser = user.getCoursesRegisteredTo();
         return (ListUser.containsAll(getKdamCourses()));
     }
 

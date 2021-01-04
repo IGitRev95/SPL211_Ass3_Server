@@ -71,6 +71,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
     public void close() {
         try {
             chan.close();
+            System.out.println("closing NIO"+Thread.currentThread().getName());
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -95,7 +96,6 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
                 close();
             }
         }
-
         if (writeQueue.isEmpty()) {
             if (protocol.shouldTerminate()) close();
             else reactor.updateInterestedOps(chan, SelectionKey.OP_READ);

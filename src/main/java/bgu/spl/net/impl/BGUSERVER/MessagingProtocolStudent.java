@@ -18,12 +18,14 @@ public class  MessagingProtocolStudent implements MessagingProtocol<CSCommand> {
             switch (opcode) {
                 //Admin Register
                 case 1:
+                    if (CurrentUserLogin!=null) throw new MyServerError("already login");
                     database.Register(TypeOfUser.Admin, CmdArgs[0], CmdArgs[1]);
                     //send ACK 1
                     cs = new ACKimp(opcode);
                     break;
                 //Student Register
                 case 2:
+                    if (CurrentUserLogin!=null) throw new MyServerError("already login");
                     database.Register(TypeOfUser.Student, CmdArgs[0], CmdArgs[1]);
                     cs = new ACKimp(opcode);
                     break;
@@ -37,6 +39,7 @@ public class  MessagingProtocolStudent implements MessagingProtocol<CSCommand> {
                     if (CurrentUserLogin == null) throw new MyServerError("not login");
                     database.Logout(CurrentUserLogin);
                     CurrentUserLogin = null;
+                    shouldTerminate=false;
                     cs = new ACKimp(opcode);
                     break;
                 //COURSEREG
@@ -70,7 +73,7 @@ public class  MessagingProtocolStudent implements MessagingProtocol<CSCommand> {
                 //STUDENTSTAT
                 case 8:
                     if (CurrentUserLogin == null || CurrentUserLogin.getType() == TypeOfUser.Student)
-                        throw new Error("not login or the user is not allowed to do so (because student)");
+                        throw new MyServerError("not login or the user is not allowed to do so (because student)");
                     else {
                         String Stat = database.StudentStat(CmdArgs[0]);
                         cs = new ACKimp(opcode);

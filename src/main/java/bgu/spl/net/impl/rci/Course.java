@@ -1,11 +1,6 @@
 package bgu.spl.net.impl.rci;
-
-import java.lang.reflect.InaccessibleObjectException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -65,8 +60,8 @@ private boolean CheckKdamOfUser(User user) {
 
 public String CourseStat(){
     lockforList.readLock().lock();    // case that no other student register/unregister time print the course stat (Reliable information)
-    String output = "(" + courseNumber + ")" + " " + courseName + "\n";
-     output=output+getSeatsAvailable()+"\n"+getListofStudents();
+    String output = "Course: (" + courseNumber + ")" + " " + courseName + "\n";
+     output=output+"Seats Available: "+getSeatsAvailable()+"\n"+"Students Registered: "+getListofStudents();
      lockforList.readLock().unlock();
      return output;
     }

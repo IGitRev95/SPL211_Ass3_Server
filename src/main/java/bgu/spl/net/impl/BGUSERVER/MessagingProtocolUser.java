@@ -5,7 +5,7 @@ import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.impl.rci.*;
 
 
-public class  MessagingProtocolStudent implements MessagingProtocol<CSCommand> {
+public class MessagingProtocolUser implements MessagingProtocol<CSCommand> {
     private boolean shouldTerminate=false;
     private final Database database= Database.getInstance();
     private User CurrentUserLogin= null;

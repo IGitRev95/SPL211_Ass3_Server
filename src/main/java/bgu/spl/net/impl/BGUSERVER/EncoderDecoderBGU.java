@@ -3,36 +3,25 @@ package bgu.spl.net.impl.BGUSERVER;
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.impl.rci.ACKimp;
 import bgu.spl.net.impl.rci.CSCommand;
-import bgu.spl.net.impl.rci.Errorimp;
-import bgu.spl.net.impl.rci.MyServerError;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Vector;
 
 public class EncoderDecoderBGU implements MessageEncoderDecoder<CSCommand> {
 private short opcode= -1;
-private short course=-1;
-private byte[] bytes;
-private byte[] objectBytes = null;
-private byte[] opcodebytes=new byte[2];
-private byte[] courseBytes=new byte[2];
-Vector<Byte> vector= new Vector<>();
+Vector<Byte> vectorBuffer = new Vector<>();
 int index=0;
-private ByteBuffer lengthBuffer = ByteBuffer.allocate(2);
-int len=0;
+private final ByteBuffer lengthBuffer = ByteBuffer.allocate(2); // using for reading short
 String[] arguments= new String[2];
+
+
     public CSCommand decodeNextByte(byte nextByte) {
         if (opcode == -1) {
             lengthBuffer.put(nextByte);
-            opcodebytes[len++] = nextByte;
             if (!lengthBuffer.hasRemaining()) {
-                opcode = bytesToShort(opcodebytes);
                 lengthBuffer.flip();
+                opcode= lengthBuffer.getShort();
                 lengthBuffer.clear();
-
-                len = 0;
                 if (opcode==4|opcode==11) return decodeByopcode(nextByte);
             }
 
@@ -41,11 +30,10 @@ String[] arguments= new String[2];
         }
         return null;
     }
-
     private void reset(){
         index=0;
-        len=0;
         opcode=-1;
+        arguments= new String[2];
     }
     private CSCommand decodeByopcode(byte nextByte){
         CSCommand output= null;
@@ -54,9 +42,8 @@ String[] arguments= new String[2];
             case 2:
             case 3:
                 if (nextByte=='\0'){
-                bytes = Toarray(vector);
-                arguments[index++]= popString();
-                vector.clear();
+                arguments[index++]= popString(VectorToarray(vectorBuffer));
+                vectorBuffer.clear();
                 if(index>=2) {
                     output = new CSCommand(opcode);
                     output.SetArgument1(arguments[0]);
@@ -64,7 +51,7 @@ String[] arguments= new String[2];
                     reset();
                 }
                 }else{
-                    vector.add(nextByte);
+                    vectorBuffer.add(nextByte);
                 }
                 break;
             case 4:
@@ -78,26 +65,24 @@ String[] arguments= new String[2];
             case 9:
             case 10:
                 lengthBuffer.put(nextByte);
-                courseBytes[index++]=nextByte;
                 if (!lengthBuffer.hasRemaining()){
                     lengthBuffer.flip();
+                    short course = lengthBuffer.getShort();
                     lengthBuffer.clear();
-                    course= bytesToShort(courseBytes);
                     output = new CSCommand(opcode);
-                    output.SetArgument1(""+course);
+                    output.SetArgument1(""+ course);
                     reset();
                 }
                 break;
             case 8:
                 if (nextByte=='\0'){
-                    bytes = Toarray(vector);
-                    arguments[index++]= popString();
-                    vector.clear();
+                    arguments[index++]= popString(VectorToarray(vectorBuffer));
+                    vectorBuffer.clear();
                     output = new CSCommand(opcode);
                     output.SetArgument1(arguments[0]);
                     reset();
                 }else{
-                    vector.add(nextByte);
+                    vectorBuffer.add(nextByte);
                 }
                 break;
         }
@@ -119,7 +104,6 @@ String[] arguments= new String[2];
                     output= appendbytes(output,encodeString(CmdArgs[1]));
             }
             byte[] zero= new byte[1];
-            zero[0]=0;
             output= appendbytes(output,zero);
         }else {
             output= shortToBytes((short) 13);
@@ -127,47 +111,32 @@ String[] arguments= new String[2];
         }
         return output;
     }
-
-    private short bytesToShort(byte[] byteArr) {
-        short result = (short)((byteArr[0] & 0xff) << 8);
-        result += (short)(byteArr[1] & 0xff);
-        return result;
-    }
     public byte[] shortToBytes(short num) {
         byte[] bytesArr = new byte[2];
         bytesArr[0] = (byte)((num >> 8) & 0xFF);
         bytesArr[1] = (byte)(num & 0xFF);
         return bytesArr;
     }
-//    private void pushByte(byte nextByte){
-//        if (len>=bytes.length)
-//            bytes= Arrays.copyOf(bytes,len*2);
-//        bytes[len++]=nextByte;
-//    }
-    private String popString(){
-        String result= new String(bytes,0,bytes.length, StandardCharsets.UTF_8);
-        len=0;
-        return result;
+    private String popString(byte[] bytes){
+        return new String(bytes,0,bytes.length, StandardCharsets.UTF_8);
     }
     private byte[] encodeString(String arg){
         return arg.getBytes();
     }
-    private byte[] Toarray(Vector<Byte> v) {
+
+    private byte[] VectorToarray(Vector<Byte> v) {
         byte[] bytes = new byte[v.size()];
         for (int i = 0; i < v.size(); i++) {
             bytes[i] = v.get(i);
         }
         return bytes;
     }
+
     private byte[] appendbytes(byte[] arr1, byte[] arr2) {
         // Add your code here
         byte[] arr3 = new byte[arr1.length + arr2.length];
-        for (int i = 0; i < arr1.length; i = i + 1) {
-            arr3[i] = arr1[i];
-        }
-        for (int i = 0; i < arr2.length; i = i + 1) {
-            arr3[i + arr1.length] = arr2[i];
-        }
+        System.arraycopy(arr1, 0, arr3, 0, arr1.length);
+        System.arraycopy(arr2, 0, arr3, arr1.length, arr2.length);
         return arr3;
     }
  }

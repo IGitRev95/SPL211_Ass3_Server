@@ -1,9 +1,7 @@
 package bgu.spl.net.srv;
 
-import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.impl.BGUSERVER.EncoderDecoderBGU;
-import bgu.spl.net.impl.BGUSERVER.MessagingProtocolStudent;
+import bgu.spl.net.impl.BGUSERVER.MessagingProtocolUser;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -13,13 +11,13 @@ import java.util.function.Supplier;
 public abstract class BaseServer<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<MessagingProtocolStudent> protocolFactory;
+    private final Supplier<MessagingProtocolUser> protocolFactory;
     private final Supplier<EncoderDecoderBGU> encdecFactory;
     private ServerSocket sock;
 
     public BaseServer(
             int port,
-            Supplier<MessagingProtocolStudent> protocolFactory,
+            Supplier<MessagingProtocolUser> protocolFactory,
             Supplier<EncoderDecoderBGU> encdecFactory) {
 
         this.port = port;

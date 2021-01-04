@@ -1,12 +1,8 @@
 package bgu.spl.net.srv;
 
-import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
 import bgu.spl.net.impl.BGUSERVER.EncoderDecoderBGU;
-import bgu.spl.net.impl.BGUSERVER.MessagingProtocolStudent;
+import bgu.spl.net.impl.BGUSERVER.MessagingProtocolUser;
 import bgu.spl.net.impl.rci.CSCommand;
-import bgu.spl.net.impl.rci.TypeOfUser;
-import bgu.spl.net.impl.rci.User;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -15,14 +11,14 @@ import java.net.Socket;
 
 public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler<T> {
 // change protocol
-    private final MessagingProtocolStudent protocol;
+    private final MessagingProtocolUser protocol;
     private final EncoderDecoderBGU encdec;
     private final Socket sock;
     private BufferedInputStream in;
     private BufferedOutputStream out;
     private volatile boolean connected = true;
 
-    public BlockingConnectionHandler(Socket sock, EncoderDecoderBGU reader, MessagingProtocolStudent protocol) {
+    public BlockingConnectionHandler(Socket sock, EncoderDecoderBGU reader, MessagingProtocolUser protocol) {
         this.sock = sock;
         this.encdec = reader;
         this.protocol = protocol;

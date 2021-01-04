@@ -7,6 +7,8 @@ import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 /**
@@ -73,27 +75,51 @@ public class Database {
 				courses.put(CourseNum, current);
 			}
 			//---------------checking-----------------------------------
-			{
-//				Register(TypeOfUser.Student, "Nave", "123123");
-//				User nave = Login("Nave", "123123");
-//				RegisterCourse(nave,101);
-//				RegisterCourse(nave, 201);
-//				Register(TypeOfUser.Student, "yoav", "123123");
-//				User yoav = Login("yoav", "123123");
-//				RegisterCourse(yoav, 102);
-//				RegisterCourse(yoav ,101);
-//				Register(TypeOfUser.Student, "yossi", "123123");
-//				User yossi = Login("yossi", "123123");
-//				RegisterCourse(yossi,101);
-//				RegisterCourse(yossi, 201);
-//				Register(TypeOfUser.Student, "tiltil", "123123");
-//				User tiltil = Login("tiltil", "123123");
-//				RegisterCourse(tiltil, 102);
-//				RegisterCourse(tiltil ,101);
-//				Register(TypeOfUser.Student, "ido", "123123");
-//				User ido = Login("ido", "123123");
-//				RegisterCourse(ido,101);
-//				RegisterCourse(ido, 201);
+			{/*
+				Register(TypeOfUser.Student, "Nave", "123123");
+				User nave = Login("Nave", "123123");
+								RegisterCourse(nave, 102);
+				Register(TypeOfUser.Student, "yoav", "123123");
+				User yoav = Login("yoav", "123123");
+				RegisterCourse(yoav, 102);
+								Register(TypeOfUser.Student, "yossi", "123123");
+				User yossi = Login("yossi", "123123");
+								RegisterCourse(yossi, 102);
+				Register(TypeOfUser.Student, "tiltil", "123123");
+				User tiltil = Login("tiltil", "123123");
+				RegisterCourse(tiltil, 102);
+								Register(TypeOfUser.Admin, "ido", "123123");
+				User ido = Login("ido", "123123");
+				RegisterCourse(ido, 102);
+				User[] list= new User[4];
+				list[0]=nave;
+				list[1]=yoav;
+				list[2]=yossi;
+				list[3]=tiltil;
+				AtomicInteger counter= new AtomicInteger(0);
+				for (int i=0; i<=3;i++){
+					new Thread(()-> {CourseStat(101);
+					counter.incrementAndGet();
+					}).start();
+					int j=i;
+					new Thread(()-> {
+						StudentStat(list[j].getUserName());
+					counter.incrementAndGet();}).start();
+					new Thread(()->{
+						RegisterCourse(list[j],101);
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					UnRegisterCourse(list[j],101);
+					counter.incrementAndGet();
+					}).start();
+				}
+				while (counter.get()!=12){
+					System.out.println(counter.get());
+				}
+				System.out.println("finish");*/
 //				Logout(nave);
 //				Register(TypeOfUser.Student, "yossi", "123123");
 //				User yossi = Login("yossi", "123123");
@@ -213,18 +239,6 @@ public class Database {
 
 	public boolean IsRegisteredtoCoruse(User user, int CourseNum) {
 		return user.IsRegisteredToCourse(CourseNum);
-	}
-
-	private String toString(int[] Array) {
-		String output="[";
-		if(Array.length!=0) {
-			for (int i = 0; i < Array.length; i++) {
-				output = output + Array[i] + ",";
-			}
-			output = output.substring(0, output.length() - 1);
-		}
-      output=output+"]";
-      return output;
 	}
 }
 

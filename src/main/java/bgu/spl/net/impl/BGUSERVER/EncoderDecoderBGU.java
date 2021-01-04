@@ -30,11 +30,6 @@ String[] arguments= new String[2];
         }
         return null;
     }
-    private void reset(){
-        index=0;
-        opcode=-1;
-        arguments= new String[2];
-    }
     private CSCommand decodeByopcode(byte nextByte){
         CSCommand output= null;
         switch (opcode){
@@ -87,6 +82,11 @@ String[] arguments= new String[2];
                 break;
         }
         return output;
+    }
+    private void reset(){
+        index=0;
+        opcode=-1;
+        arguments= new String[2];
     }
     public byte[] encode(CSCommand message){
         byte[] output;

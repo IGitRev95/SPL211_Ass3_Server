@@ -1,15 +1,10 @@
 package bgu.spl.net;
-import bgu.spl.net.impl.BGUSERVER.EncoderDecoderBGU;
 import bgu.spl.net.impl.rci.*;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
+
 
 /**
  * Passive object representing the Database where all courses and users are stored.
@@ -23,26 +18,19 @@ public class Database {
 	public static class SingletonHolder {
 		private static Database instance = new Database();
 	}
-
 	private final LinkedHashMap<Integer, Course> courses = new LinkedHashMap<>();
-	//private Vector<Course> courses= new Vector<>();
 	private final ConcurrentHashMap<String, User> RegisterList = new ConcurrentHashMap<>();
-//private ConcurrentHashMap<String,User> LoginManagement= new ConcurrentHashMap<>();
 
 
 	//to prevent user from creating new Database
 	private Database() {
-		// TODO: by name txt and not with args cant think other way so far because it is private...
 		if (!initialize("Courses.txt")) throw new Error(("something get wrong with the initialization"));
 	}
 
 	/**
 	 * Retrieves the single instance of this class.
 	 */
-	//TODO: i changed here getInstance that they gave us maybe i will chage later to original
-//	public static Database getInstance() {
-//		return singleton;
-//	}
+
 	public static Database getInstance() {
 		return SingletonHolder.instance;
 	}
@@ -52,22 +40,20 @@ public class Database {
 	 * into the Database, returns true if successful.
 	 */
 	boolean initialize(String coursesFilePath) {
-		// TODO: implement
+		// TODO: delete tests
 		try { // try read the txt file
 			File myObj = new File(coursesFilePath);
 			Scanner myReader = new Scanner(myObj);
 			while (myReader.hasNextLine()) { // while has one more line
 				String data = myReader.nextLine(); // return this line and move forward
-				String[] DataLine = data.split("\\|"); // return Array of String of this line split by |
-				//int[] KdamCheckAsInt={};
+				String[] DataLine = data.split("\\|"); // return Array of String of this line split by '|'
 				LinkedHashSet<Integer> KdamCheckAsInt = new LinkedHashSet<>();
 				if (!DataLine[2].equals("[]")) { // if Kdam check is not empty
-					// making Array of ints from the Array of Strings
+					// making List of Integer from the Array of Strings
 					String[] KdamCheckAsString = (DataLine[2].substring(1, DataLine[2].length() - 1)).split(",");
 					for (int i = 0; i < KdamCheckAsString.length; i++) {
 						KdamCheckAsInt.add(Integer.parseInt(KdamCheckAsString[i]));
 					}
-					//KdamCheckAsInt= Stream.of(KdamCheckAsString).mapToInt(Integer::parseInt).toArray();
 				}
 				// add this course to the list of courses
 				int CourseNum = Integer.parseInt(DataLine[0]);
@@ -156,13 +142,13 @@ public class Database {
 
 	private User getUser(String username) {
 		User user = RegisterList.getOrDefault(username, null);
-		if (user == null) throw new MyServerError("user by this name not registered");
+		if (user == null) throw new MyServerError("No such user");
 		else return user;
 	}
 
 	private Course getCourse(int CourseNum) {
 		Course course = courses.getOrDefault(CourseNum, null);
-		if (course == null) throw new MyServerError("there is not corsue" + CourseNum + " in the System");
+		if (course == null) throw new MyServerError("No such corsue" + CourseNum + " in the System");
 		return course;
 	}
 
@@ -179,8 +165,9 @@ public class Database {
 
 	public User Login(String username, String password) {
 		User user = getUser(username);
-		if (!(user.assertPassword(password))) throw new MyServerError("wrong password");
-		if (!(user.getIsLogedIn().compareAndSet(false, true))) throw new MyServerError("already Loged in");
+		if (!( user.assertPassword(password))) throw new MyServerError("Wrong password");
+		if (!( user.getIsLogedIn().compareAndSet(false, true )))
+			throw new MyServerError("Already logged in");
 		return user;
 	}
 
@@ -202,7 +189,7 @@ public class Database {
 
 	public String getKdamCheckList(int CourseNum) {
 		Course course = getCourse(CourseNum);
-		return (Arrays.toString(course.getKdamCheck().toArray()).replaceAll(", ",","));
+		return Arrays.toString( course.getKdamCourses().toArray() ).replaceAll(", ",",");
 	}
 
 	public String CourseStat(int CourseNum) {
@@ -213,22 +200,21 @@ public class Database {
 	public String StudentStat(String username) {
 		User Student = getUser(username);
 		if (Student.getType() != TypeOfUser.Student) throw new MyServerError("the user is not Student");
-		//TODO: check if need Sync
 		try {
-			Student.ReadCourses(); // (lock)case that student try to register/unregister the time Admin iterate the list
-			{
-				return "Student: "+username + "\n" + "Courses: "+ListOfCoursesStudentRegisteredOrdered(Student);
-			}
-		} finally {
+			  Student.ReadCourses(); // (lock) case that student try to register/unregister the time Admin iterate the list
+			  return "Student: "+username + "\n" + "Courses: "+ListOfCoursesStudentRegisteredOrdered(Student);
+		} finally { // freeing the lock guaranteed (even in case of exception)
 			Student.finishReadCourses();
 		}
 	}
 
 	public String ListOfCoursesStudentRegisteredOrdered(User Student) {
+		// no need for sync cause student perform the act and he is the only manipulator of the data
 		Collection<Integer> CoursesOfStudent = Student.getCoursesRegistered();
 		int[] ArrayOrdered = new int[CoursesOfStudent.size()];
 		int i = 0;
 		for (Map.Entry<Integer, Course> entry : courses.entrySet()) {
+			// for every course check if the student is registered to it, order preserved
 			Integer key = entry.getKey();
 			if (Student.IsRegisteredToCourse(key))
 				ArrayOrdered[i++] = key;
@@ -238,6 +224,7 @@ public class Database {
 	}
 
 	public boolean IsRegisteredtoCoruse(User user, int CourseNum) {
+		// no need for sync cause student perform the act and he is the only manipulator of the data
 		return user.IsRegisteredToCourse(CourseNum);
 	}
 }

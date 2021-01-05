@@ -71,7 +71,6 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
     public void close() {
         try {
             chan.close();
-            System.out.println("closing NIO"+Thread.currentThread().getName());
         } catch (IOException ex) {
             ex.printStackTrace();
         }

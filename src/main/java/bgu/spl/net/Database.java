@@ -40,7 +40,6 @@ public class Database {
 	 * into the Database, returns true if successful.
 	 */
 	boolean initialize(String coursesFilePath) {
-		// TODO: delete tests
 		try { // try read the txt file
 			File myObj = new File(coursesFilePath);
 			Scanner myReader = new Scanner(myObj);
@@ -60,76 +59,6 @@ public class Database {
 				Course current = new Course(CourseNum, DataLine[1], KdamCheckAsInt, Integer.parseInt(DataLine[3]));
 				courses.put(CourseNum, current);
 			}
-			//---------------checking-----------------------------------
-			{/*
-				Register(TypeOfUser.Student, "Nave", "123123");
-				User nave = Login("Nave", "123123");
-								RegisterCourse(nave, 102);
-				Register(TypeOfUser.Student, "yoav", "123123");
-				User yoav = Login("yoav", "123123");
-				RegisterCourse(yoav, 102);
-								Register(TypeOfUser.Student, "yossi", "123123");
-				User yossi = Login("yossi", "123123");
-								RegisterCourse(yossi, 102);
-				Register(TypeOfUser.Student, "tiltil", "123123");
-				User tiltil = Login("tiltil", "123123");
-				RegisterCourse(tiltil, 102);
-								Register(TypeOfUser.Admin, "ido", "123123");
-				User ido = Login("ido", "123123");
-				RegisterCourse(ido, 102);
-				User[] list= new User[4];
-				list[0]=nave;
-				list[1]=yoav;
-				list[2]=yossi;
-				list[3]=tiltil;
-				AtomicInteger counter= new AtomicInteger(0);
-				for (int i=0; i<=3;i++){
-					new Thread(()-> {CourseStat(101);
-					counter.incrementAndGet();
-					}).start();
-					int j=i;
-					new Thread(()-> {
-						StudentStat(list[j].getUserName());
-					counter.incrementAndGet();}).start();
-					new Thread(()->{
-						RegisterCourse(list[j],101);
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					UnRegisterCourse(list[j],101);
-					counter.incrementAndGet();
-					}).start();
-				}
-				while (counter.get()!=12){
-					System.out.println(counter.get());
-				}
-				System.out.println("finish");*/
-//				Logout(nave);
-//				Register(TypeOfUser.Student, "yossi", "123123");
-//				User yossi = Login("yossi", "123123");
-//				Register(TypeOfUser.Admin, "Yoav", "123123");
-//				User Yoav = Login("Yoav", "123123");
-//				RegisterCourse(nave, 101);
-//				try {
-//					RegisterCourse(nave, 101);
-//					UnRegisterCourse(yossi, 202);
-//				} catch (MyServerError e) {
-//					System.out.println(e);
-//				}
-//
-//				Thread t1 = new Thread(() -> RegisterCourse(yossi, 101));
-//				Thread t3 = new Thread(() -> RegisterCourse(nave, 201));
-//				Thread t2 = new Thread(() -> System.out.println(CourseStat(101)));
-//				Thread t4 = new Thread(() -> System.out.println(StudentStat("Nave")));
-//				t1.start();
-//				t2.start();
-//				t3.start();
-//				t4.start();
-//				System.out.println(CourseStat(101));
-			}
-			//
 			myReader.close();
 			return true;
 		} catch (FileNotFoundException e) {

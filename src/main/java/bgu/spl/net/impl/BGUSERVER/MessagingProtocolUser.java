@@ -37,7 +37,6 @@ public class MessagingProtocolUser implements MessagingProtocol<CSCommand> {
                 case 4:
                     if (CurrentLoggedInUser == null) throw new MyServerError("not logged in");
                     database.Logout(CurrentLoggedInUser);
-                   //  CurrentLoggedInUser = null; // remove current logged in user //TODO: delete
                     shouldTerminate=true;
                     replyCommand = new ACKimp(opcode); //ACK 4
                     break;

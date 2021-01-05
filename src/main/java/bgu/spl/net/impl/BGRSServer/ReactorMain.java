@@ -1,4 +1,4 @@
-package bgu.spl.net.impl.BGUSERVER;
+package bgu.spl.net.impl.BGRSServer;
 
 import bgu.spl.net.Database;
 import bgu.spl.net.srv.Server;

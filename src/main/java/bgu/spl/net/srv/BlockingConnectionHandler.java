@@ -1,7 +1,7 @@
 package bgu.spl.net.srv;
 
-import bgu.spl.net.impl.BGUSERVER.EncoderDecoderBGU;
-import bgu.spl.net.impl.BGUSERVER.MessagingProtocolUser;
+import bgu.spl.net.impl.BGRSServer.EncoderDecoderBGU;
+import bgu.spl.net.impl.BGRSServer.MessagingProtocolUser;
 import bgu.spl.net.impl.rci.CSCommand;
 
 import java.io.BufferedInputStream;

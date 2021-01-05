@@ -2,8 +2,8 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
-import bgu.spl.net.impl.BGUSERVER.EncoderDecoderBGU;
-import bgu.spl.net.impl.BGUSERVER.MessagingProtocolUser;
+import bgu.spl.net.impl.BGRSServer.EncoderDecoderBGU;
+import bgu.spl.net.impl.BGRSServer.MessagingProtocolUser;
 
 import java.io.Closeable;
 import java.util.function.Supplier;

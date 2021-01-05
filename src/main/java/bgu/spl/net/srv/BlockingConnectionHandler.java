@@ -36,8 +36,8 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
                 if (nextMessage != null) {
                     CSCommand response = protocol.process(nextMessage);
                     if (response != null) {
-                        byte[] responsebytes=encdec.encode(response);
-                        out.write(responsebytes);
+                        byte[] responseBytes=encdec.encode(response);
+                        out.write(responseBytes);
                         out.flush();
                     }
                 }
@@ -54,7 +54,6 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
         sock.close();
     }
     public void send(T msg){
-        //my implemention
-
+        //my implementation
     }
 }

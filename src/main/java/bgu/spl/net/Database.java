@@ -36,7 +36,7 @@ public class Database {
 	}
 
 	/**
-	 * loades the courses from the file path specified
+	 * loads the courses from the file path specified
 	 * into the Database, returns true if successful.
 	 */
 	boolean initialize(String coursesFilePath) {
@@ -87,14 +87,9 @@ public class Database {
 	}
 
 	public void Register(TypeOfUser type, String username, String password) {
-		synchronized (RegisterList) { // case that 2 Students try to Register with the same name
-			if (RegisterList.containsKey(username))
-				throw new MyServerError("already user with name" + username + " in the system");
-			else {
-				User user = new User(type, username, password);
-				RegisterList.put(username, user);
-			}
-		}
+        User user = new User(type,username,password);
+        if(RegisterList.putIfAbsent(username,user)!=null)
+            throw new MyServerError("Username: "+username+", already in use");
 	}
 
 	public User Login(String username, String password) {

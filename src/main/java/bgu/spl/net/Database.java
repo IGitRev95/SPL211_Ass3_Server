@@ -59,7 +59,12 @@ public class Database {
 				Course current = new Course(CourseNum, DataLine[1], KdamCheckAsInt, Integer.parseInt(DataLine[3]));
 				courses.put(CourseNum, current);
 			}
+
 			myReader.close();
+			// sort kdamcheck as in the coursefile
+			for (Map.Entry<Integer, Course> entry : courses.entrySet()) {
+				entry.getValue().SortKdamCheck(courses);
+			}
 			return true;
 		} catch (FileNotFoundException e) {
 			System.out.println("An error occurred.");
@@ -118,7 +123,7 @@ public class Database {
 
 	public String getKdamCheckList(int CourseNum) {
 		Course course = getCourse(CourseNum);
-		return SortLikeCourseFile(course.getKdamCourses());
+		return Arrays.toString(course.getKdamCourses().toArray()).replaceAll(", ",",");
 	}
 
 	public String CourseStat(int CourseNum) {
@@ -130,10 +135,10 @@ public class Database {
 		User Student = getUser(username);
 		if (Student.getType() != TypeOfUser.Student) throw new MyServerError("the user is not Student");
 		try {
-			  Student.ReadCourses(); // (lock) case that student try to register/unregister the time Admin iterate the list
-			  return "Student: "+username + "\n" + "Courses: "+ListOfCoursesStudentRegisteredOrdered(Student);
+			Student.ReadCourses(); // (lock) case that student try to register/unregister the time Admin iterate the list
+			return "Student: "+username + "\n" + "Courses: "+ListOfCoursesStudentRegisteredOrdered(Student);
 		} finally { // freeing the lock guaranteed (even in case of exception)
-			  Student.finishReadCourses();
+			Student.finishReadCourses();
 		}
 	}
 
@@ -160,4 +165,3 @@ public class Database {
 		return user.IsRegisteredToCourse(CourseNum);
 	}
 }
-

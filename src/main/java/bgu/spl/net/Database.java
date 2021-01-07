@@ -118,7 +118,7 @@ public class Database {
 
 	public String getKdamCheckList(int CourseNum) {
 		Course course = getCourse(CourseNum);
-		return Arrays.toString( course.getKdamCourses().toArray() ).replaceAll(", ",",");
+		return SortLikeCourseFile(course.getKdamCourses());
 	}
 
 	public String CourseStat(int CourseNum) {
@@ -140,16 +140,19 @@ public class Database {
 	public String ListOfCoursesStudentRegisteredOrdered(User Student) {
 		// no need for sync cause student perform the act and he is the only manipulator of the data
 		Collection<Integer> CoursesOfStudent = Student.getCoursesRegisteredTo();
-		int[] ArrayOrdered = new int[CoursesOfStudent.size()];
+		return SortLikeCourseFile(CoursesOfStudent);
+
+	}
+	private String SortLikeCourseFile(Collection<Integer> List){
+		int[] ArrayOrdered = new int[List.size()];
 		int i = 0;
 		for (Map.Entry<Integer, Course> entry : courses.entrySet()) {
 			// for every course check if the student is registered to it, order preserved
 			Integer key = entry.getKey();
-			if (Student.IsRegisteredToCourse(key))
+			if (List.contains(key))
 				ArrayOrdered[i++] = key;
 		}
 		return Arrays.toString(ArrayOrdered).replaceAll(", ",",");
-
 	}
 
 	public boolean IsRegisteredtoCoruse(User user, int CourseNum) {

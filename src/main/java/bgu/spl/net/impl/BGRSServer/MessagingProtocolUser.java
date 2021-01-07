@@ -30,6 +30,7 @@ public class MessagingProtocolUser implements MessagingProtocol<CSCommand> {
                     break;
                 //Login
                 case 3:
+                    if(CurrentLoggedInUser!=null) throw new MyServerError("already logged in");
                     CurrentLoggedInUser = database.Login(CmdArgs[0], CmdArgs[1]); //return this logged in user if Login was successfully
                     replyCommand = new ACKimp(opcode); //ACK 3
                     break;
@@ -49,8 +50,8 @@ public class MessagingProtocolUser implements MessagingProtocol<CSCommand> {
                     break;
                 //KDAMCHECK
                 case 6:
-                    if (CurrentLoggedInUser == null)
-                        throw new MyServerError("not logged in");
+                    if (CurrentLoggedInUser == null || CurrentLoggedInUser.getType() == TypeOfUser.Admin)
+                        throw new MyServerError("not logged in or the user is not allowed"); // not allowed because Admin
                     else {
                         String KdamCheck = database.getKdamCheckList(Integer.parseInt(CmdArgs[0]));
                         replyCommand = new ACKimp(opcode); //ACK 6

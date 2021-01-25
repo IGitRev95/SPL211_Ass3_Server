@@ -36,7 +36,7 @@ public class Database {
 	}
 
 	/**
-	 * loades the courses from the file path specified
+	 * loads the courses from the file path specified
 	 * into the Database, returns true if successful.
 	 */
 	boolean initialize(String coursesFilePath) {
@@ -59,7 +59,12 @@ public class Database {
 				Course current = new Course(CourseNum, DataLine[1], KdamCheckAsInt, Integer.parseInt(DataLine[3]));
 				courses.put(CourseNum, current);
 			}
+
 			myReader.close();
+			// sort kdamcheck as in the coursefile
+			for (Map.Entry<Integer, Course> entry : courses.entrySet()) {
+				entry.getValue().SortKdamCheck(courses);
+			}
 			return true;
 		} catch (FileNotFoundException e) {
 			System.out.println("An error occurred.");
@@ -82,14 +87,9 @@ public class Database {
 	}
 
 	public void Register(TypeOfUser type, String username, String password) {
-		synchronized (RegisterList) { // case that 2 Students try to Register with the same name
-			if (RegisterList.containsKey(username))
-				throw new MyServerError("already user with name" + username + " in the system");
-			else {
-				User user = new User(type, username, password);
-				RegisterList.put(username, user);
-			}
-		}
+        User user = new User(type,username,password);
+        if(RegisterList.putIfAbsent(username,user)!=null)
+            throw new MyServerError("Username: "+username+", already in use");
 	}
 
 	public User Login(String username, String password) {
@@ -118,7 +118,7 @@ public class Database {
 
 	public String getKdamCheckList(int CourseNum) {
 		Course course = getCourse(CourseNum);
-		return Arrays.toString( course.getKdamCourses().toArray() ).replaceAll(", ",",");
+		return Arrays.toString(course.getKdamCourses().toArray()).replaceAll(", ",",");
 	}
 
 	public String CourseStat(int CourseNum) {
@@ -130,26 +130,29 @@ public class Database {
 		User Student = getUser(username);
 		if (Student.getType() != TypeOfUser.Student) throw new MyServerError("the user is not Student");
 		try {
-			  Student.ReadCourses(); // (lock) case that student try to register/unregister the time Admin iterate the list
-			  return "Student: "+username + "\n" + "Courses: "+ListOfCoursesStudentRegisteredOrdered(Student);
+			Student.ReadCourses(); // (lock) case that student try to register/unregister the time Admin iterate the list
+			return "Student: "+username + "\n" + "Courses: "+ListOfCoursesStudentRegisteredOrdered(Student);
 		} finally { // freeing the lock guaranteed (even in case of exception)
-			  Student.finishReadCourses();
+			Student.finishReadCourses();
 		}
 	}
 
 	public String ListOfCoursesStudentRegisteredOrdered(User Student) {
 		// no need for sync cause student perform the act and he is the only manipulator of the data
 		Collection<Integer> CoursesOfStudent = Student.getCoursesRegisteredTo();
-		int[] ArrayOrdered = new int[CoursesOfStudent.size()];
+		return SortLikeCourseFile(CoursesOfStudent);
+
+	}
+	private String SortLikeCourseFile(Collection<Integer> List){
+		int[] ArrayOrdered = new int[List.size()];
 		int i = 0;
 		for (Map.Entry<Integer, Course> entry : courses.entrySet()) {
 			// for every course check if the student is registered to it, order preserved
 			Integer key = entry.getKey();
-			if (Student.IsRegisteredToCourse(key))
+			if (List.contains(key))
 				ArrayOrdered[i++] = key;
 		}
 		return Arrays.toString(ArrayOrdered).replaceAll(", ",",");
-
 	}
 
 	public boolean IsRegisteredtoCoruse(User user, int CourseNum) {
@@ -157,4 +160,3 @@ public class Database {
 		return user.IsRegisteredToCourse(CourseNum);
 	}
 }
-

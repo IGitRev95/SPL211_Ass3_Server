@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class Course {
     private final int courseNumber;
     private final String courseName;
-    private final LinkedHashSet<Integer> KdamCourses;
+    private LinkedHashSet<Integer> KdamCourses;
     private final int CourseCapacity;
     private final ConcurrentHashMap<String,User> RegisteredStudents;
     private final ReadWriteLock LockForRegisteredStudents = new ReentrantReadWriteLock();
@@ -23,7 +23,15 @@ public class Course {
         this.CourseCapacity = CourseCapacity;
         RegisteredStudents = new ConcurrentHashMap<>(2* CourseCapacity);
     }
-
+    //sorting kdamcourses like in the course file
+    public void SortKdamCheck(LinkedHashMap<Integer,Course> courses){
+        LinkedHashSet<Integer> KdamCoursesSorted= new LinkedHashSet<>();
+        for (Map.Entry<Integer, Course> entry : courses.entrySet()) {
+            if(KdamCourses.contains(entry.getKey()))
+                KdamCoursesSorted.add(entry.getKey());
+        }
+        KdamCourses=KdamCoursesSorted;
+    }
     public int getCourseNumber(){
         return courseNumber;
     }
@@ -84,5 +92,4 @@ public class Course {
         return Available+"/"+ CourseCapacity;
     }
 }
-
 
